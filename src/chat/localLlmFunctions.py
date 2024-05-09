@@ -3,12 +3,14 @@ from typing_extensions import Self
 from urllib.request import urlretrieve
 
 import viam
+import viam.components
+import viam.components.camera
 from viam.module.types import Reconfigurable
 from viam.proto.app.robot import ComponentConfig
 from viam.proto.common import ResourceName, Vector3
 from viam.resource.base import ResourceBase
 from viam.resource.types import Model, ModelFamily
-
+from viam.utils import struct_to_dict
 from semantic_router import Route
 from semantic_router.utils.function_call import get_schema
 from semantic_router.encoders import HuggingFaceEncoder
@@ -25,7 +27,7 @@ encoder = HuggingFaceEncoder()
 from chat_service_api import Chat
 from viam.logging import getLogger
 
-import time
+import importlib
 import asyncio
 import os
 
@@ -52,10 +54,6 @@ class localLlmFunctions(Chat, Reconfigurable):
 
     @classmethod
     def validate(cls, config: ComponentConfig):
-        # here we validate config, the following is just an example and should be updated as needed
-        some_pin = config.attributes.fields["some_pin"].number_value
-        if some_pin == "":
-            raise Exception("A some_pin must be defined")
         return
 
     def reconfigure(self, config: ComponentConfig, dependencies: Mapping[ResourceName, ResourceBase]):
@@ -129,18 +127,16 @@ class localLlmFunctions(Chat, Reconfigurable):
     def _build_routes(self):
         routes = []
         for r in self.route_config:
-            # component or service, but plural
-            type = getattr(viam, r.type  + "s")
-            subtype = getattr(type, r.subtype)
-            base_class = getattr(subtype, ''.join(x.capitalize() for x in r.subtype.split('_')))
-            resource_dep = self.deps[base_class.get_resource_name(r.dep)]
+            resource_module = importlib.import_module('viam.' + r['type'] + "s" + '.' + r['subtype'])
+            base_class = getattr(resource_module, ''.join(x.capitalize() for x in r['subtype'].split('_')))
+            resource_dep = self.deps[base_class.get_resource_name(r['dep'])]
             resource = cast(base_class, resource_dep)
-            self.route_methods[r.name] = getattr(resource, r.method)
+            self.route_methods[r['name']] = getattr(resource, r['method'])
             route = Route(
-                name=r.name,
+                name=r['name'],
                 description=r.get('description', ''),
-                utterances=r.utterances,
-                function_schema=get_schema(self.route_methods[r.name])
+                utterances=r['utterances'],
+                function_schema=get_schema(self.route_methods[r['name']])
             )
             routes.append(route)
         return routes
