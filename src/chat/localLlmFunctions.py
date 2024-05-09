@@ -1,5 +1,6 @@
 from typing import ClassVar, Mapping, Sequence, Any, Dict, Optional, Tuple, Final, List, cast
 from typing_extensions import Self
+from urllib.request import urlretrieve
 
 import viam
 from viam.module.types import Reconfigurable
@@ -39,7 +40,7 @@ class localLlmFunctions(Chat, Reconfigurable):
     LLM_REPO = ""
     LLM_FILE = ""
     MODEL_PATH = os.path.abspath(os.path.join(MODEL_DIR, LLM_FILE))
-    llama = Llama
+    llama = None
     rl = RouteLayer
     route_methods = {}
 
@@ -80,17 +81,35 @@ class localLlmFunctions(Chat, Reconfigurable):
         self.route_config = list(attrs.get("routes", []))
         self.debug = bool(attrs.get("debug", False))
         self.deps = dependencies
-        asyncio.create_task(self.get_model()).add_done_callback(self._ensure_llama)
+        asyncio.create_task(self._get_model()).add_done_callback(self._ensure_llama)
 
-    async def get_model(self):
+    async def chat(self, message: str) -> str:
+        if self.llama is None:
+            raise Exception("LLM is not ready")
+
+        rl_response = self.rl(message)
+        if (rl_response.name != None):
+            await self.route_methods[rl_response.name](**rl_response.function_call)
+            message = "Say 'OK, I did " + message + "'"
+
+        response = self.llama.create_chat_completion(
+            messages=[
+                {"role": "system", "content": self.system_message},
+                {"role": "user", "content": message},
+            ],
+            temperature=self.temperature,
+        )
+        return response["choices"][0]["message"]["content"]
+    
+    async def _get_model(self):
         if not os.path.exists(self.MODEL_PATH):
             LLM_URL = (
                 f"https://huggingface.co/{self.LLM_REPO}/resolve/main/{self.LLM_FILE}"
             )
             LOGGER.info(f"Fetching model {self.LLM_FILE} from {LLM_URL}")
-            urlretrieve(LLM_URL, self.MODEL_PATH, self.log_progress)
+            urlretrieve(LLM_URL, self.MODEL_PATH, self._log_progress)
 
-    def log_progress(self, count: int, block_size: int, total_size: int) -> None:
+    def _log_progress(self, count: int, block_size: int, total_size: int) -> None:
         percent = count * block_size * 100 // total_size
         LOGGER.info(f"\rDownloading {self.LLM_FILE}: {percent}%")
 
