@@ -1,0 +1,3 @@
+viam-sdk
+chat-service-api @ git+https://github.com/viam-labs/chat-service-api.git@v0.1.1
+semantic_router
