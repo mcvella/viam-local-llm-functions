@@ -21,7 +21,6 @@ from semantic_router import RouteLayer
 
 from llama_cpp import Llama
 from semantic_router.llms.llamacpp import LlamaCppLLM
-import viam.services
 
 llm_encoder = HuggingFaceEncoder()
 
@@ -38,9 +37,9 @@ MODEL_DIR = os.environ.get(
     "VIAM_MODULE_DATA", os.path.join(os.path.expanduser("~"), ".data", "models")
 )
 
-class localLlmFunctions(Chat, Reconfigurable):
+class localLlmToolRouter(Chat, Reconfigurable):
 
-    MODEL: ClassVar[Model] = Model(ModelFamily("mcvella", "chat"), "local-llm-functions")
+    MODEL: ClassVar[Model] = Model(ModelFamily("mcvella", "chat"), "local-llm-tool-router")
     LLM_REPO = ""
     LLM_FILE = ""
     MODEL_PATH = os.path.abspath(os.path.join(MODEL_DIR, LLM_FILE))
@@ -75,10 +74,10 @@ class localLlmFunctions(Chat, Reconfigurable):
         self.system_message = str(
             attrs.get(
                 "system_message",
-                "A chat between a curious user and a friendly, laconic, and helpful assistant. As an assistant you do provide any detail from tasks performed.",
+                "A chat between a curious user and a friendly, laconic, and helpful assistant. As an assistant you do provide specific detail from tasks performed.",
             )
         )
-        self.route_config = list(attrs.get("routes", []))
+        self.route_config = list(attrs.get("tools", []))
         self.debug = bool(attrs.get("debug", False))
         self.deps = dependencies
         asyncio.create_task(self._get_model()).add_done_callback(self._ensure_llama)
@@ -139,7 +138,7 @@ class localLlmFunctions(Chat, Reconfigurable):
             self.route_methods[r['name']] = getattr(resource, r['method'])
             route = Route(
                 name=r['name'],
-                #description=r.get('description', ''),
+                description=r.get('description', ''),
                 utterances=r['utterances'],
                 function_schema=get_schema(self.route_methods[r['name']])
             )
