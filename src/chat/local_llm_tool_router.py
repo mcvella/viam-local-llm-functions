@@ -64,7 +64,7 @@ class localLlmToolRouter(Chat, Reconfigurable):
             attrs.get("llm_repo", "TheBloke/Mistral-7B-Instruct-v0.2-GGUF")
         )
         self.LLM_FILE = str(
-            attrs.get("llm_file", "mistral-7b-instruct-v0.2.Q5_K_S.gguf")
+            attrs.get("llm_file", "mistral-7b-instruct-v0.2.Q4_K_M.gguf")
         )
         self.MODEL_PATH = os.path.abspath(os.path.join(MODEL_DIR, self.LLM_FILE))
 

@@ -34,7 +34,7 @@ On the new component panel, copy and paste the following attribute template into
     "temperature": 0.75,
     "debug": false,
     "llm_repo": "TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
-    "llm_file": "mistral-7b-instruct-v0.2.Q5_K_S.gguf"
+    "llm_file": "mistral-7b-instruct-v0.2.Q4_K_M.gguf"
 }
 ```
 
