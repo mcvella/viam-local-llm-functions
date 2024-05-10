@@ -61,10 +61,10 @@ class localLlmToolRouter(Chat, Reconfigurable):
         attrs = struct_to_dict(config.attributes)
         LOGGER.debug(attrs)
         self.LLM_REPO = str(
-            attrs.get("llm_repo", "TheBloke/Mistral-7B-Instruct-v0.2-GGUF")
+            attrs.get("llm_repo", "NousResearch/Hermes-2-Pro-Mistral-7B-GGUF")
         )
         self.LLM_FILE = str(
-            attrs.get("llm_file", "mistral-7b-instruct-v0.2.Q4_K_M.gguf")
+            attrs.get("llm_file", "Hermes-2-Pro-Mistral-7B.Q4_K_M.gguf")
         )
         self.MODEL_PATH = os.path.abspath(os.path.join(MODEL_DIR, self.LLM_FILE))
 
