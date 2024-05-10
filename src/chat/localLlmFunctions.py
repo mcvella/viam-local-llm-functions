@@ -2,9 +2,6 @@ from typing import ClassVar, Mapping, Sequence, Any, Dict, Optional, Tuple, Fina
 from typing_extensions import Self
 from urllib.request import urlretrieve
 
-import viam
-import viam.components
-import viam.components.camera
 from viam.module.types import Reconfigurable
 from viam.proto.app.robot import ComponentConfig
 from viam.proto.common import ResourceName, Vector3
@@ -22,7 +19,7 @@ from llama_cpp import Llama
 from semantic_router.llms.llamacpp import LlamaCppLLM
 import viam.services
 
-encoder = HuggingFaceEncoder()
+encoder = HuggingFaceEncoder("intfloat/e5-base-v2")
 
 from chat_service_api import Chat
 from viam.logging import getLogger
@@ -30,6 +27,7 @@ from viam.logging import getLogger
 import importlib
 import asyncio
 import os
+import re
 
 LOGGER = getLogger(__name__)
 MODEL_DIR = os.environ.get(
@@ -73,7 +71,7 @@ class localLlmFunctions(Chat, Reconfigurable):
         self.system_message = str(
             attrs.get(
                 "system_message",
-                "A chat between a curious user and a friendly, laconic, and helpful assistant",
+                "A chat between a curious user and a friendly, laconic, and helpful assistant. As an assistant you do provide any detail from tasks performed.",
             )
         )
         self.route_config = list(attrs.get("routes", []))
@@ -85,11 +83,14 @@ class localLlmFunctions(Chat, Reconfigurable):
         if self.llama is None:
             raise Exception("LLM is not ready")
 
+        LOGGER.error("will do chat")
         rl_response = self.rl(message)
+        LOGGER.error(rl_response)
         if (rl_response.name != None):
-            await self.route_methods[rl_response.name](**rl_response.function_call)
-            message = "Say 'OK, I did " + message + "'"
+            output = await self.route_methods[rl_response.name](**rl_response.function_call)
+            message = "Say 'OK, I did the task " + message + "' and got the following response: " + str(output)
 
+        LOGGER.error("MESSAGE: " + message)
         response = self.llama.create_chat_completion(
             messages=[
                 {"role": "system", "content": self.system_message},
@@ -134,9 +135,12 @@ class localLlmFunctions(Chat, Reconfigurable):
             self.route_methods[r['name']] = getattr(resource, r['method'])
             route = Route(
                 name=r['name'],
-                description=r.get('description', ''),
+                #description=r.get('description', ''),
                 utterances=r['utterances'],
                 function_schema=get_schema(self.route_methods[r['name']])
             )
+            # remote * and **__, rl's get_schema gets tripped up with these
+            route.function_schema['signature'] = re.sub( r'\*\s*,|,\s*\*\*__', '', route.function_schema['signature'])           
+            LOGGER.error(route)
             routes.append(route)
         return routes
