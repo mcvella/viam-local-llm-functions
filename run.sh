@@ -39,7 +39,7 @@ if [[ $OS == "Linux" ]]; then
     export CMAKE_ARGS="-DLLAMA_CUDA=on"
     export CUDACXX=/usr/local/cuda/bin/nvcc
     CUDA_VER=$(nvidia-smi | grep "CUDA Version" | awk '{print $(NF-1)}' | tr -d '.')
-    EXTRA="--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/$CUDA_VER"
+    EXTRA="--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu$CUDA_VER"
   else
     echo "Setting OpenBLAS cmake args"
     $SUDO apt-get install -qqy clang libopenblas-dev

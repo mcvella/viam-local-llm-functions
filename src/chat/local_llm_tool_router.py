@@ -118,7 +118,6 @@ class localLlmToolRouter(Chat, Reconfigurable):
     def _ensure_llama(self, _task: asyncio.Task[None]):
         self.llama = Llama(
             model_path=self.MODEL_PATH,
-            chat_format="chatml",
             n_gpu_layers=self.n_gpu_layers,
             n_ctx=self.n_ctx,
             verbose=self.debug,
