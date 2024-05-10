@@ -1,6 +1,6 @@
-# local-llm-tool_router modular service
+# local-llm-tool-router modular service
 
-This module implements the [viam-labs chat API](https://github.com/viam-labs/chat-api) in a mcvella:chat:local-llm-tool_router model.
+This module implements the [viam-labs chat API](https://github.com/viam-labs/chat-api) in a mcvella:chat:local-llm-tool-router model.
 This model leverages [semantic router](https://github.com/aurelio-labs/semantic-router) and a local llm to allow you to specify specific configured tools - component and service functions that can be contextually routed to and executed, based on chat input.
 
 For example, if your machine has a configured servo called 'headMotor', you could configure a tool to know about the *move()* method for this servo, creating a tool called "turn_head".
@@ -13,7 +13,7 @@ This model will run on most CPUs, and on most laptops, but will be much more per
 
 ## Build and Run
 
-To use this module, follow these instructions to [add a module from the Viam Registry](https://docs.viam.com/registry/configure/#add-a-modular-resource-from-the-viam-registry) and select the `mcvella:chat:local-llm-tool_router` model from the [`mcvella:chat:local-llm-tool_router` module](https://github.com/mcvella/viam-local-llm-tool_router).
+To use this module, follow these instructions to [add a module from the Viam Registry](https://docs.viam.com/registry/configure/#add-a-modular-resource-from-the-viam-registry) and select the `mcvella:chat:local-llm-tool-router` model from the [`mcvella:chat:local-llm-tool-router` module](https://github.com/mcvella/viam-local-llm-tool-router).
 
 ## Configure your chat
 
@@ -22,7 +22,7 @@ To use this module, follow these instructions to [add a module from the Viam Reg
 
 Navigate to the **Config** tab of your robot’s page in [the Viam app](https://app.viam.com/).
 Click on the **Components** subtab and click **Create component**.
-Select the `chat` type, then select the `mcvella:chat:local-llm-tool_router` model.
+Select the `chat` type, then select the `mcvella:chat:local-llm-tool-router` model.
 Enter a name for your chat and click **Create**.
 
 On the new component panel, copy and paste the following attribute template into your chat’s **Attributes** box:
@@ -43,7 +43,7 @@ On the new component panel, copy and paste the following attribute template into
 
 ### Attributes
 
-The following attributes are available for `viam-labs:chat:mcvella:chat:local-llm-tool_router` chats:
+The following attributes are available for `viam-labs:chat:mcvella:chat:local-llm-tool-router` chats:
 
 | Name | Type | Inclusion | Description |
 | ---- | ---- | --------- | ----------- |
@@ -81,7 +81,7 @@ The following attributes are available for `viam-labs:chat:mcvella:chat:local-ll
 ```
 
 A tool gives the LLM information about a given Viam component or service method that is associated with a specified dependency.
-The specified resource (*dep*) must be included in the *depends_on* field for the configured *local-llm-tool_router* service.
+The specified resource (*dep*) must be included in the *depends_on* field for the configured *local-llm-tool-router* service.
 You must then specify the resource *type* (component or service), the resource *subtype* (for example, 'motor'), and associated method.
 
 This module is written in Python and uses the [Viam Python SDK](https://python.viam.dev/), so you must use methods as they are specified in the Python SDK.
