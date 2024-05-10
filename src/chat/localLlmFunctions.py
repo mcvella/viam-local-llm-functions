@@ -2,6 +2,10 @@ from typing import ClassVar, Mapping, Sequence, Any, Dict, Optional, Tuple, Fina
 from typing_extensions import Self
 from urllib.request import urlretrieve
 
+# this is ugly and hard to maintain, but they seem required for any dep subtype - maybe an issue with registry?
+from viam.components import audio_input, arm, base, board, camera, encoder, gantry, generic, gripper, input, motor, movement_sensor, pose_tracker, power_sensor, sensor, servo
+from viam.services import generic, mlmodel, motion, navigation, sensors, slam, vision
+
 from viam.module.types import Reconfigurable
 from viam.proto.app.robot import ComponentConfig
 from viam.proto.common import ResourceName, Vector3
@@ -19,7 +23,7 @@ from llama_cpp import Llama
 from semantic_router.llms.llamacpp import LlamaCppLLM
 import viam.services
 
-encoder = HuggingFaceEncoder("intfloat/e5-base-v2")
+llm_encoder = HuggingFaceEncoder()
 
 from chat_service_api import Chat
 from viam.logging import getLogger
@@ -83,14 +87,14 @@ class localLlmFunctions(Chat, Reconfigurable):
         if self.llama is None:
             raise Exception("LLM is not ready")
 
-        LOGGER.error("will do chat")
+        LOGGER.debug("will do chat")
         rl_response = self.rl(message)
         LOGGER.error(rl_response)
         if (rl_response.name != None):
             output = await self.route_methods[rl_response.name](**rl_response.function_call)
             message = "Say 'OK, I did the task " + message + "' and got the following response: " + str(output)
 
-        LOGGER.error("MESSAGE: " + message)
+        LOGGER.debug("MESSAGE: " + message)
         response = self.llama.create_chat_completion(
             messages=[
                 {"role": "system", "content": self.system_message},
@@ -121,7 +125,7 @@ class localLlmFunctions(Chat, Reconfigurable):
             verbose=self.debug,
         )
         llm = LlamaCppLLM(name="mistral-7b-instruct", llm=self.llama, max_tokens=None)
-        self.rl = RouteLayer(encoder=encoder, routes=self._build_routes(), llm=llm)
+        self.rl = RouteLayer(encoder=llm_encoder, routes=self._build_routes(), llm=llm)
 
         LOGGER.debug("LLM is ready")
 
@@ -141,6 +145,6 @@ class localLlmFunctions(Chat, Reconfigurable):
             )
             # remote * and **__, rl's get_schema gets tripped up with these
             route.function_schema['signature'] = re.sub( r'\*\s*,|,\s*\*\*__', '', route.function_schema['signature'])           
-            LOGGER.error(route)
+            LOGGER.debug(route)
             routes.append(route)
         return routes
