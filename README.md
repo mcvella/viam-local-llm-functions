@@ -34,7 +34,8 @@ On the new component panel, copy and paste the following attribute template into
     "temperature": 0.75,
     "debug": false,
     "llm_repo": "NousResearch/Hermes-2-Pro-Mistral-7B-GGUF",
-    "llm_file": "Hermes-2-Pro-Mistral-7B.Q4_K_M.gguf"
+    "llm_file": "Hermes-2-Pro-Mistral-7B.Q4_K_M.gguf",
+    "tools": [...]
 }
 ```
 
