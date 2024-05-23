@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 
 .installed
+module.tar.gz

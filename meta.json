@@ -1,0 +1,13 @@
+{
+  "module_id": "mcvella:local-llm-tool-router",
+  "visibility": "public",
+  "url": "https://github.com/mcvella/viam-local-llm-tool-router",
+  "description": "An LLM tool router to enable Viam projects to use LLMs to understand and call Viam SDK functions",
+  "models": [
+    {
+      "api": "viam-labs:chat:llm",
+      "model": "mcvella:chat:local-llm-tool-router"
+    }
+  ],
+  "entrypoint": "run.sh"
+}
